@@ -1,5 +1,8 @@
 # Configuração e validação
 
+Para instalar e iniciar pela primeira vez, siga o
+[tutorial passo a passo do README](../README.md).
+
 ## 1. Credencial NVIDIA
 
 No Gerenciador de Credenciais do Windows, crie uma credencial genérica:

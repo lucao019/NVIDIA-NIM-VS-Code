@@ -1,74 +1,285 @@
-# Central de IA para Desenvolvimento no VS Code
+# NVIDIA NIM no VS Code — tutorial passo a passo
 
-Este diretório contém uma ponte local para usar NVIDIA NIM no VS Code sem
-gravar a chave real da NVIDIA nas configurações do agente ou no projeto.
+Este guia ensina a conectar o NVIDIA NIM ao VS Code no Windows, sem colocar a
+chave real da NVIDIA no projeto. Siga os passos na ordem. Não precisa saber
+programar para preparar a conexão.
 
-## Componentes
+> **Importante:** a chave real é privada. Nunca a envie em chats, prints,
+> commits, GitHub, arquivos do projeto ou comandos que possam ficar salvos no
+> histórico do terminal.
 
-- NVIDIA NIM: endpoint OpenAI-compatible hospedado em
-  `https://integrate.api.nvidia.com/v1`.
-- Modelo: `nvidia/nemotron-3.5-super-vl-120b-a12b`.
-- Continue: agente de programação do VS Code, configurado globalmente para
-  falar com a ponte local.
-- Cline: instalado, mas a versão testada falha ao enviar tarefas por um erro
-  Unicode `ByteString` (Cline issue #11163). Pode permanecer instalado, porém
-  ainda não foi validado com este modelo.
-- Claude Code: já estava instalado no ambiente, mas ainda não estava
-  autenticado durante a auditoria. É independente do Cline/NIM.
+## O que você vai montar
 
-## Requisitos
+O caminho da mensagem é:
 
-- Windows e VS Code.
-- Node.js e Windows PowerShell.
-- Uma credencial genérica no Gerenciador de Credenciais do Windows:
-  - Destino: `NVIDIA-NIM`
-  - Nome de usuário: `NVIDIA_API_KEY`
-  - Senha: chave criada no portal NVIDIA.
+```text
+Seu pedido -> Continue no VS Code -> ponte local -> NVIDIA NIM
+```
 
-Não coloque a chave NVIDIA no projeto, no `.env`, na configuração do Cline ou
-em comandos. A extensão guarda sua própria chave de acesso à ponte local; essa
-chave não é a credencial NVIDIA.
+A ponte local busca a chave no Gerenciador de Credenciais do Windows. O
+Continue usa apenas um código local (`local-nvidia-bridge`), não a chave real
+da NVIDIA.
 
-## Iniciar a ponte
+**Limite de segurança:** esse código local não é uma senha forte nem protege
+contra outros programas executados na sua conta do Windows. Enquanto a ponte
+estiver aberta, mantenha o VS Code e o computador protegidos e feche a ponte
+com `Ctrl+C` quando terminar.
 
-No terminal PowerShell integrado do VS Code, aberto neste diretório:
+## Antes de começar
+
+Você precisa de:
+
+1. Windows 10 ou 11.
+2. Visual Studio Code.
+3. Node.js instalado.
+4. Uma conta NVIDIA com acesso ao endpoint NIM.
+5. Uma chave NIM válida, guardada no Gerenciador de Credenciais do Windows.
+
+O modelo escolhido é hospedado pela NVIDIA. Ele **não é baixado nem executado
+na sua RTX 2060**; o computador envia pedidos pela internet ao serviço NVIDIA.
+O acesso está sujeito à disponibilidade, aos limites e aos termos da sua conta.
+
+## Passo 1 — Baixar este projeto
+
+Se ainda não baixou o projeto:
+
+1. Abra o VS Code.
+2. Abra o terminal integrado com **Terminal > New Terminal**.
+3. No terminal, copie e execute:
+
+```powershell
+git clone https://github.com/lucao019/NVIDIA-NIM-VS-Code.git
+```
+
+4. Abra a pasta baixada:
+
+```powershell
+code .\NVIDIA-NIM-VS-Code
+```
+
+Se o comando `code` não for reconhecido, no VS Code escolha **File > Open
+Folder...** e selecione a pasta `NVIDIA-NIM-VS-Code`.
+
+Se você já abriu esta pasta no VS Code, pule este passo.
+
+## Passo 2 — Confirmar os programas necessários
+
+No terminal integrado do VS Code, execute um comando de cada vez:
+
+```powershell
+node --version
+```
+
+```powershell
+git --version
+```
+
+Cada comando deve mostrar um número de versão. Se algum deles não for
+reconhecido, instale Node.js ou Git somente do site oficial correspondente,
+feche e reabra o VS Code e tente de novo. Não é necessário instalar Python
+para usar a ponte deste projeto.
+
+## Passo 3 — Guardar a chave NVIDIA no Windows
+
+Este passo é necessário uma única vez em cada computador:
+
+1. Gere sua chave no portal oficial [build.nvidia.com](https://build.nvidia.com/).
+   Use uma conta e um modelo que mostrem acesso a um endpoint/API.
+2. **Não cole a chave neste README, no Continue nem no chat.**
+3. Pressione **Win + R**.
+4. Digite `control /name Microsoft.CredentialManager` e pressione Enter.
+5. Clique em **Credenciais do Windows**.
+6. Clique em **Adicionar uma credencial genérica**.
+7. Preencha exatamente:
+
+   - **Endereço de rede ou Internet:** `NVIDIA-NIM`
+   - **Nome de usuário:** `NVIDIA_API_KEY`
+   - **Senha:** sua chave real NVIDIA
+
+8. Salve a credencial.
+
+Se uma credencial `NVIDIA-NIM` já existir, use **Editar** para atualizá-la.
+Não crie várias entradas com nomes diferentes: o inicializador procura
+exatamente `NVIDIA-NIM`.
+
+## Passo 4 — Instalar a extensão Continue
+
+1. No VS Code, pressione **Ctrl+Shift+X** para abrir Extensions.
+2. Pesquise **Continue**.
+3. Instale a extensão **Continue** publicada por `Continue`.
+4. Se o VS Code pedir para recarregar, aceite.
+5. Abra o painel **Continue** pelo ícone na barra lateral.
+
+O Cline pode estar instalado também, mas neste ambiente apresentou um erro
+`ByteString` ao enviar mensagens. Para o NVIDIA NIM, use Continue.
+
+## Passo 5 — Configurar o Continue para usar a ponte
+
+O Continue precisa de uma configuração no seu perfil do Windows. Essa
+configuração é diferente dos arquivos deste repositório.
+
+1. No VS Code, pressione **Ctrl+Shift+P**.
+2. Digite e escolha **Continue: Open Settings** ou abra o arquivo
+   `%USERPROFILE%\.continue\config.yaml`.
+3. Se esse arquivo já tiver configurações que você usa, **não apague tudo**.
+   Faça uma cópia de segurança antes de editar e preserve o que já existe.
+4. Para uma configuração nova e vazia, use este conteúdo:
+
+```yaml
+name: NVIDIA NIM
+version: 1.0.0
+schema: v1
+models:
+  - name: NVIDIA Nemotron 3.5 Super
+    provider: openai
+    model: nvidia/nemotron-3.5-super-vl-120b-a12b
+    apiBase: http://127.0.0.1:8765/v1
+    apiKey: local-nvidia-bridge
+    roles:
+      - chat
+      - edit
+      - apply
+    capabilities:
+      - tool_use
+    requestOptions:
+      timeout: 120000
+```
+
+5. Salve o arquivo.
+6. Se a configuração não aparecer, pressione **Ctrl+Shift+P**, escolha
+   **Developer: Reload Window** e aguarde o VS Code abrir novamente.
+7. No painel Continue, selecione **NVIDIA Nemotron 3.5 Super**.
+
+`local-nvidia-bridge` é o código usado entre Continue e a ponte neste
+computador. **Não o substitua pela chave real NVIDIA.** A chave real continua
+guardada no Windows.
+
+## Passo 6 — Ligar a ponte NVIDIA
+
+Você precisa ligar a ponte toda vez que iniciar uma sessão de trabalho:
+
+1. No VS Code, abra **Terminal > New Terminal**.
+2. Confira se o terminal diz **PowerShell** e se está dentro da pasta deste
+   projeto. O começo da linha deve parecer com:
+
+```text
+PS ...\NVIDIA-NIM-VS-Code>
+```
+
+3. Execute:
 
 ```powershell
 .\Start-NvidiaNimBridge.ps1
 ```
 
-Mantenha esse terminal aberto enquanto usar o agente. Para parar a ponte,
-pressione `Ctrl+C`.
+4. Espere a mensagem:
 
-## Usar os agentes
+```text
+Local NVIDIA NIM bridge is ready at http://127.0.0.1:8765/v1.
+```
 
-O Continue foi configurado em `%USERPROFILE%\.continue\config.yaml`. Se a
-extensão pedir recarga, use **Developer: Reload Window** e abra o painel
-Continue. O modelo global configurado é `NVIDIA Nemotron 3.5 Super`; ele deve
-ser tratado como agente principal nesta configuração.
+5. **Deixe esse terminal aberto.** Não digite os pedidos de IA nele. Use o
+   chat Continue em outro painel/aba do VS Code.
 
-O Cline também pode apontar para a mesma ponte com esses campos:
+Se o terminal disser que não encontrou a credencial, volte ao Passo 3 e
+confira o nome e o usuário da credencial. Se a mensagem mencionar política de
+execução do PowerShell, não altere a política do Windows por conta própria;
+peça ajuda antes.
 
-- Base URL: `http://127.0.0.1:8765/v1`
-- API Key: `local-nvidia-bridge`
-- Model ID: `nvidia/nemotron-3.5-super-vl-120b-a12b`
+## Passo 7 — Fazer seu primeiro pedido
 
-Porém, o Cline instalado apresentou um erro de codificação ao enviar uma
-mensagem curta. Veja [a limitação conhecida](docs/CONFIGURACAO.md) antes de
-usá-lo.
+1. Abra o painel **Continue**.
+2. Confira se o modelo selecionado é **NVIDIA Nemotron 3.5 Super**.
+3. Digite:
 
-O suporte efetivo a chamadas de ferramentas ainda depende de validação
-interativa. O identificador local não substitui nem revela a chave NVIDIA.
+```text
+Responda somente: NIM conectado.
+```
 
-## Teste manual
+4. Envie a mensagem e aguarde a resposta.
 
-Com a ponte em execução, peça ao Continue para abrir e explicar
-`examples/agent-smoke-test.js`, sem editar o arquivo. Isso confirma o caminho
-VS Code → agente → ponte local → NVIDIA NIM.
+Depois, teste a leitura de um arquivo com:
 
-Consulte [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md) para detalhes,
-diagnóstico e limitações.
+```text
+Leia examples/agent-smoke-test.js. Explique o que a função formatGreeting faz
+e dê um exemplo de entrada de borda. Não edite arquivos nem execute comandos.
+```
 
-O teste de chat e a análise de leitura do arquivo de exemplo já foram
-executados no Continue; edição de arquivos e uso de ferramentas continuam
-pendentes de validação.
+Esse pedido apenas consulta o arquivo. O teste no Continue já foi feito e o
+agente explicou corretamente a função e o caso `null`/`undefined`.
+
+## Passo 8 — Usar o agente com cuidado
+
+- Comece pedindo para **explicar ou analisar**, sem editar.
+- Para alterações, peça primeiro uma proposta e revise o diff antes de
+  aceitar.
+- Não autorize comandos que você não entenda.
+- Não aceite exclusões em massa, `git reset --hard`, `git clean -fd` ou push
+  sem revisar o que será feito.
+- Não ative aprovação automática para escrita/terminal se quiser aprovar cada
+  operação.
+- O modelo pode errar. Confira mudanças e rode os testes do seu projeto.
+
+## Passo 9 — Encerrar
+
+Quando terminar de usar o NIM:
+
+1. Clique no terminal que mostra `Local NVIDIA NIM bridge is ready`.
+2. Pressione **Ctrl+C**.
+3. A ponte será encerrada. Você pode fechar o VS Code depois.
+
+Se fechar o terminal sem querer, os pedidos ao modelo deixarão de funcionar;
+inicie a ponte novamente pelo Passo 6.
+
+## Problemas comuns
+
+### “Credential not found”
+
+A credencial não foi encontrada. Confira **Windows Credentials > Generic
+Credentials** e confirme:
+
+- Endereço: `NVIDIA-NIM`
+- Usuário: `NVIDIA_API_KEY`
+
+Não envie a senha/chave para pedir ajuda.
+
+### “Could not connect” ou a mensagem fica aguardando
+
+1. Confira se o terminal da ponte continua aberto.
+2. Confirme que ele mostra `Local NVIDIA NIM bridge is ready`.
+3. Confira se a internet está funcionando.
+4. Tente novamente uma única vez.
+
+### Erro 401 ou autenticação inválida
+
+A NVIDIA não aceitou a chave, ou o acesso ao endpoint não está habilitado.
+Atualize a chave pelo portal NVIDIA e no Gerenciador de Credenciais. Não a
+cole no Continue, no `.env` ou no terminal.
+
+### O modelo não aparece no Continue
+
+1. Confirme que salvou `%USERPROFILE%\.continue\config.yaml`.
+2. Confira se a indentação YAML corresponde ao exemplo do Passo 5.
+3. Execute **Developer: Reload Window** na Paleta de Comandos.
+4. Reabra Continue e procure `NVIDIA Nemotron 3.5 Super`.
+
+### Cline mostra “ByteString”
+
+Use o Continue para NVIDIA NIM. O Cline instalado apresentou esse erro mesmo
+com mensagens curtas. Os detalhes estão em
+[docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).
+
+## Claude Code e Git
+
+Claude Code é um chat/agente separado. A instalação já existia, mas não estava
+autenticada; faça login somente pelo fluxo oficial se sua conta permitir. Ele
+não usa automaticamente a conversa nem a autenticação do NVIDIA NIM.
+
+O projeto está no [GitHub](https://github.com/lucao019/NVIDIA-NIM-VS-Code).
+Revise `git status` e os diffs antes de criar commits ou fazer push. Arquivos
+`.env` são ignorados pelo Git, mas **não use `.env` para guardar a chave**:
+este projeto lê a chave do Gerenciador de Credenciais do Windows.
+
+Para arquitetura e configuração detalhada, consulte
+[docs/ARQUITETURA.md](docs/ARQUITETURA.md) e
+[docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).
