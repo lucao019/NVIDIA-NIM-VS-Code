@@ -1,8 +1,9 @@
 # Ligar o ambiente depois de reiniciar o PC
 
-Use este guia toda vez que ligar o computador e quiser programar com o
-NVIDIA NIM no VS Code. A chave continua guardada no Gerenciador de Credenciais
-do Windows; você não precisa digitá-la de novo.
+Depois de instalar a tarefa automática uma vez, use este guia toda vez que
+ligar o computador e quiser programar com o NVIDIA NIM no VS Code. A chave
+continua guardada no Gerenciador de Credenciais do Windows; você não precisa
+digitá-la de novo.
 
 ## 1. Abrir o VS Code
 
@@ -28,16 +29,55 @@ trust the authors** somente se você criou o projeto ou confia na origem dele.
 > de todos os seus projetos. Abra a pasta do projeto em que quer programar;
 > a ponte pode continuar aberta separadamente.
 
-## 3. Abrir um terminal PowerShell
+## 3. Primeira vez: ativar o início automático
+
+Este passo é feito uma única vez. Ele agenda a ponte para iniciar quando você
+entrar na sua conta do Windows:
+
+1. No VS Code, abra **File > Open Folder...** e abra a pasta
+   `H:\NVIDIA + CLAUDE FREE` (a pasta deste projeto).
+2. Clique em **Terminal > New Terminal** e confirme que está usando PowerShell.
+3. Execute:
+
+```powershell
+.\Install-NimBridgeStartup.ps1
+```
+
+4. Leia a confirmação no terminal. A tarefa usa sua conta normal do Windows,
+   sem privilégios de administrador, e abre uma janela PowerShell minimizada.
+5. Para a tarefa iniciar, saia da conta do Windows e entre novamente, ou
+   reinicie o PC.
+
+Esse agendamento é local ao seu Windows e não é enviado ao GitHub. Ele não
+guarda a chave; a chave continua no Credential Manager.
+
+> **Atenção:** com o início automático ativado, a ponte e o acesso local ao NIM
+> ficam disponíveis durante sua sessão do Windows, mesmo quando você não está
+> usando o VS Code. Desative o início automático se não quiser esse
+> comportamento.
+
+## 4. Depois de entrar no Windows
+
+Após entrar na sua conta, o Windows inicia a ponte automaticamente em uma
+janela PowerShell minimizada. Abra o VS Code e qualquer pasta de projeto.
+Escolha **Continue > NVIDIA Nemotron 3.5 Super** e envie sua mensagem.
+
+Procure a janela PowerShell minimizada se quiser conferir as mensagens da
+ponte. Não inicie outra ponte na porta 8765 enquanto a automática estiver
+rodando.
+
+Se a janela não iniciou, ou se você ainda não configurou o início automático,
+use o início manual abaixo.
+
+## 5. Iniciar manualmente (alternativa)
 
 1. No VS Code, clique em **Terminal > New Terminal**.
 2. O terminal deve mostrar **PowerShell**.
 3. Se abrir outro tipo de terminal, clique na seta ao lado do botão `+` do
    terminal e escolha **PowerShell**.
 
-## 4. Iniciar a ponte NVIDIA
-
-Na janela do terminal, copie e execute esta linha:
+Na pasta deste projeto, execute a linha a seguir. Se o diretório do projeto for
+outro, use o caminho completo indicado aqui:
 
 ```powershell
 & "H:\NVIDIA + CLAUDE FREE\Start-NvidiaNimBridge.ps1"
@@ -56,14 +96,14 @@ conseguir conversar com a NVIDIA.
 O inicializador lê a chave do Gerenciador de Credenciais do Windows. Se pedir
 para você colar uma chave, pare: este inicializador não deve pedir isso.
 
-## 5. Abrir o Continue e escolher o modelo
+## 6. Abrir o Continue e escolher o modelo
 
 1. Na barra lateral do VS Code, clique em **Continue**.
 2. No seletor de modelo, escolha **NVIDIA Nemotron 3.5 Super**.
 3. Se o painel Continue não aparecer, pressione **Ctrl+Shift+P**, escreva
    `Continue: Focus Continue Chat` e pressione **Enter**.
 
-## 6. Mandar uma mensagem de teste
+## 7. Mandar uma mensagem de teste
 
 No chat Continue, envie:
 
@@ -83,31 +123,49 @@ arquivo, diga qual.
 Para pedir uma mudança depois, explique o que quer e revise o diff antes de
 aceitar qualquer edição. Não aprove comandos ou exclusões que você não entenda.
 
-## 7. Trabalhar em outro projeto
+## 8. Trabalhar em outro projeto
 
 O Continue é instalado no VS Code e pode ser usado em pastas de projetos
 diferentes. A ponte só precisa ser iniciada **uma vez por vez**:
 
-1. Mantenha aberta a janela do VS Code com o terminal da ponte.
+1. Mantenha aberta a janela PowerShell minimizada da ponte. Se estiver usando
+   o modo manual, mantenha aberto o terminal onde executou o inicializador.
 2. Abra outra janela do VS Code com **File > New Window**.
 3. Na nova janela, clique em **File > Open Folder...** e escolha a pasta do
    outro projeto.
 4. Abra o Continue nessa janela e selecione **NVIDIA Nemotron 3.5 Super**.
 
-Não inicie uma segunda ponte. Se fechar a janela/terminal onde a ponte está
-rodando, inicie-a novamente seguindo o passo 4.
+Não inicie uma segunda ponte. Com o início automático, a mesma ponte atende
+qualquer pasta de projeto durante a sessão atual do Windows.
 
-## 8. Encerrar com segurança
+## 9. Parar ou desativar a ponte
 
-Quando terminar:
+Para parar a ponte na sessão atual:
 
-1. Volte à janela que mostra `Local NVIDIA NIM bridge is ready`.
-2. Clique dentro do terminal dessa janela.
+1. Restaure a janela PowerShell minimizada da ponte.
+2. Clique dentro da janela.
 3. Pressione **Ctrl+C**.
-4. A mensagem de servidor pronto deve parar. Agora pode fechar o VS Code.
 
-Ao reiniciar o PC, basta repetir os passos deste guia. Você não precisa criar
-outra chave NVIDIA nem copiar a chave para o projeto.
+Isso para a ponte atual, mas ela inicia novamente no próximo login enquanto a
+tarefa automática estiver ativada.
+
+Para desativar o início automático:
+
+1. Abra a pasta `H:\NVIDIA + CLAUDE FREE` no VS Code.
+2. Abra **Terminal > New Terminal**.
+3. Execute:
+
+```powershell
+.\Disable-NimBridgeStartup.ps1
+```
+
+O script impede inícios automáticos em futuros logins. Se a ponte já estiver
+rodando agora, pare-a também com **Ctrl+C** na janela PowerShell minimizada.
+Você pode reativar o início automático executando
+`.\Install-NimBridgeStartup.ps1` novamente.
+
+Ao reiniciar o PC, a tarefa inicia a ponte no login. A chave não precisa ser
+criada novamente nem copiada para o projeto.
 
 ## Se algo não funcionar
 
@@ -124,15 +182,16 @@ Não envie a senha/chave em mensagens ou capturas de tela.
 
 ### O chat não responde
 
-1. Confira se o terminal da ponte ainda está aberto.
-2. Confira se aparece nele `Local NVIDIA NIM bridge is ready`.
+1. Confira se a janela PowerShell da ponte está aberta ou minimizada.
+2. Confira se ela mostra `Local NVIDIA NIM bridge is ready`.
 3. Confira se o Continue está usando **NVIDIA Nemotron 3.5 Super**.
 4. Tente enviar novamente uma vez.
 
 ### A chave nunca foi guardada neste computador
 
 Siga o [Passo 3 do tutorial do README](README.md#passo-3--guardar-a-chave-nvidia-no-windows)
-uma vez. Depois volte ao passo 4 deste guia.
+uma vez. Depois execute o passo 3 deste guia para ativar o início automático,
+ou inicie a ponte manualmente.
 
 ### Cline mostra erro `ByteString`
 

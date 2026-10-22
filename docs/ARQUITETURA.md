@@ -20,6 +20,8 @@
    validado neste ambiente.
 7. **Claude Code** — permanece instalado separadamente; a autenticação
    existente não estava ativa na auditoria e não foi alterada.
+8. **Tarefa agendada opcional** — pode iniciar a ponte no login do usuário
+   atual, em janela PowerShell minimizada, sem privilégios administrativos.
 
 ## Fluxo
 
@@ -48,6 +50,9 @@ Unicode observado no Cline.
   concede acesso ao NIM sem a ponte ativa e não substitui a chave real.
 - A ponte não é um serviço permanente: inicie-a conscientemente e pare-a com
   `Ctrl+C` quando terminar.
+- O início automático opcional mantém a ponte disponível durante toda a sessão
+  do Windows. `Disable-NimBridgeStartup.ps1` desativa logins futuros, mas a
+  instância atual ainda deve ser parada com `Ctrl+C`.
 - O endpoint hospedado está sujeito a autenticação, disponibilidade, termos e
   limites da conta NVIDIA.
 - A GPU local RTX 2060 não executa este modelo de 120B; a inferência validada é

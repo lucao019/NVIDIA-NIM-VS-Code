@@ -15,7 +15,30 @@ Não compartilhe a chave. O inicializador espera exatamente esse destino e
 usuário; em caso de ausência ou incompatibilidade, encerra antes de iniciar o
 servidor.
 
-## 2. Iniciar e parar a ponte
+## 2. Início automático ou manual
+
+Para iniciar a ponte automaticamente ao entrar na sua conta do Windows,
+execute uma vez no PowerShell, aberto na pasta deste projeto:
+
+```powershell
+.\Install-NimBridgeStartup.ps1
+```
+
+A tarefa roda com a conta atual e privilégios limitados, sem exigir
+administrador. Ela inicia no próximo login em uma janela PowerShell
+minimizada. A chave não é copiada nem gravada pela tarefa.
+
+Essa opção mantém a ponte disponível durante toda a sessão do Windows. Se
+preferir desativar os próximos inícios automáticos:
+
+```powershell
+.\Disable-NimBridgeStartup.ps1
+```
+
+O script desativa a tarefa, mas não encerra a ponte que já está rodando.
+Restaure a janela PowerShell minimizada e pressione `Ctrl+C` para pará-la.
+
+Se não quiser o início automático, ligue a ponte manualmente:
 
 No PowerShell integrado do VS Code, neste diretório, execute:
 

@@ -156,30 +156,49 @@ guardada no Windows.
 
 ## Passo 6 — Ligar a ponte NVIDIA
 
-Você precisa ligar a ponte toda vez que iniciar uma sessão de trabalho:
+### Opção A — Início automático ao entrar no Windows
 
-1. No VS Code, abra **Terminal > New Terminal**.
-2. Confira se o terminal diz **PowerShell** e se está dentro da pasta deste
-   projeto. O começo da linha deve parecer com:
+Se quiser que a ponte comece sozinha após entrar na conta do Windows, abra
+esta pasta no VS Code, inicie um terminal PowerShell e execute **uma vez**:
 
-```text
-PS ...\NVIDIA-NIM-VS-Code>
+```powershell
+.\Install-NimBridgeStartup.ps1
 ```
 
-3. Execute:
+O Windows cria uma tarefa para sua conta normal (sem privilégios de
+administrador). Ela será executada no próximo login, em uma janela PowerShell
+minimizada. A chave continua somente no Gerenciador de Credenciais.
+
+**Segurança:** com essa opção, a ponte fica ativa durante toda a sua sessão do
+Windows, mesmo quando não estiver programando. Para desativar os próximos
+inícios automáticos, execute:
+
+```powershell
+.\Disable-NimBridgeStartup.ps1
+```
+
+Esse comando não encerra uma ponte que já está rodando. Para pará-la agora,
+restaure a janela PowerShell minimizada e pressione `Ctrl+C`.
+
+### Opção B — Início manual
+
+Se preferir não deixar a ponte iniciar em cada login:
+
+1. No VS Code, abra **Terminal > New Terminal**.
+2. No PowerShell, execute:
 
 ```powershell
 .\Start-NvidiaNimBridge.ps1
 ```
 
-4. Espere a mensagem:
+3. Espere aparecer:
 
-```text
+```powershell
 Local NVIDIA NIM bridge is ready at http://127.0.0.1:8765/v1.
 ```
 
-5. **Deixe esse terminal aberto.** Não digite os pedidos de IA nele. Use o
-   chat Continue em outro painel/aba do VS Code.
+4. Deixe o terminal aberto enquanto usa a IA. Digite seus pedidos no chat
+   Continue, não no terminal.
 
 Se o terminal disser que não encontrou a credencial, volte ao Passo 3 e
 confira o nome e o usuário da credencial. Se a mensagem mencionar política de
@@ -224,12 +243,22 @@ agente explicou corretamente a função e o caso `null`/`undefined`.
 
 Quando terminar de usar o NIM:
 
-1. Clique no terminal que mostra `Local NVIDIA NIM bridge is ready`.
+1. No modo automático, restaure a janela PowerShell minimizada da ponte.
+   No modo manual, clique no terminal onde executou o inicializador.
 2. Pressione **Ctrl+C**.
-3. A ponte será encerrada. Você pode fechar o VS Code depois.
+3. A ponte será encerrada nesta sessão. Se a tarefa automática continuar
+   ativa, ela iniciará novamente no próximo login do Windows.
 
-Se fechar o terminal sem querer, os pedidos ao modelo deixarão de funcionar;
-inicie a ponte novamente pelo Passo 6.
+Para desativar futuros inícios automáticos, abra a pasta deste projeto no VS
+Code e execute:
+
+```powershell
+.\Disable-NimBridgeStartup.ps1
+```
+
+Isso não encerra a ponte que já está rodando; pare-a também com **Ctrl+C**.
+Para voltar a iniciar automaticamente, execute
+`.\Install-NimBridgeStartup.ps1`.
 
 ## Problemas comuns
 

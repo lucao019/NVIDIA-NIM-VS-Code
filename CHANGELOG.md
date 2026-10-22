@@ -12,6 +12,8 @@
   usando somente o identificador local da ponte.
 - Confirmados no Continue uma resposta de chat real do NIM e a análise correta
   do arquivo de exemplo, sem edição de arquivos nem execução de comandos.
+- Adicionados scripts reversíveis para iniciar a ponte ao entrar no Windows
+  ou desativar o início automático; atualizados os tutoriais de inicialização.
 - Adicionadas instruções, proteção para arquivos `.env` e um exemplo pequeno
   para testar leitura de arquivo pelo agente.
 - Claude Code e sua autenticação não foram alterados; a instalação estava
